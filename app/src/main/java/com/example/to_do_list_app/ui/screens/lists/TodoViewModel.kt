@@ -200,6 +200,62 @@ class TodoViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Deletes a todo list
+     */
+    fun deleteList(listId: Long) {
+        _todoState.update { it.copy(isLoading = true) }
+        viewModelScope.launch {
+            try {
+                // Get the list to delete
+                val list = todoListDao.getListById(listId)
+
+                if (list != null) {
+                    // Delete from Room
+                    todoListDao.deleteList(list)
+
+                    // Delete from Firebase
+                    if (list.firebaseId.isNotEmpty()) {
+                        database.child("lists").child(list.firebaseId).removeValue().await()
+
+                        // Also delete all items associated with this list from Firebase
+                        database.child("items")
+                            .orderByChild("listId")
+                            .equalTo(listId.toDouble())
+                            .get()
+                            .await()
+                            .children.forEach { snapshot ->
+                                snapshot.ref.removeValue().await()
+                            }
+                    }
+
+                    // Update the state
+                    _todoState.update { currentState ->
+                        currentState.copy(
+                            lists = currentState.lists.filter { it.id != listId },
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    // List not found
+                    _todoState.update {
+                        it.copy(
+                            error = "List not found",
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _todoState.update {
+                    it.copy(
+                        error = e.message ?: "Failed to delete list",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    /**
      * Loads all lists for a specific user
      */
     fun loadLists(userId: String) {
@@ -314,4 +370,6 @@ class TodoViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+
 }

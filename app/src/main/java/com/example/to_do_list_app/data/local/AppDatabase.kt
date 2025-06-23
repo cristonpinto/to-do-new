@@ -12,7 +12,7 @@ import com.example.to_do_list_app.util.DateConverter
 /**
  * Room database for the Todo app
  */
-@Database(entities = [TodoList::class, TodoItem::class], version = 1, exportSchema = false)
+@Database(entities = [TodoList::class, TodoItem::class], version = 2, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun todoListDao(): TodoListDao

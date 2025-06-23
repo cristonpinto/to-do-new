@@ -16,10 +16,12 @@ data class TodoList(
     val userId: String = "", // References the Firebase user ID
     val createdAt: Date = Date(),
     val category: String = "Personal", // Default category
-    val firebaseId: String = "" // Used to sync with Firebase
+    val firebaseId: String = "", // Used to sync with Firebase
+    val taskCount: Int = 0,
+    val completedTaskCount: Int = 0
 ) {
     // Required empty constructor for Firebase
-    constructor() : this(0, "", "", Date(), "Personal", "")
+    constructor() : this(0, "", "", Date(), "Personal", "", 0, 0)
 
     // Create a map for Firebase storage
     fun toMap(): Map<String, Any?> {

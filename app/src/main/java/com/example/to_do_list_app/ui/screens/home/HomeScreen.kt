@@ -1,6 +1,8 @@
 package com.example.to_do_list_app.ui.screens.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +18,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.to_do_list_app.R
 import com.example.to_do_list_app.ui.screens.auth.AuthViewModel
 import com.example.to_do_list_app.ui.theme.ToDoListAppTheme
 
@@ -37,44 +43,45 @@ fun HomeScreen(
     val authState by authViewModel.authState.collectAsState()
     val userName = authState.user?.displayName ?: "User"
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background image
+        Image(
+            painter = painterResource(id = R.drawable.homepic),
+            contentDescription = "Background Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        // Content overlay
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = Color.Transparent
         ) {
-            Text(
-                text = "Welcome to $userName's TO DO List!",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "This App was developed by Your_Name (Student_ID).",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Button(
-                onClick = onNavigateToLists,
-                modifier = Modifier.size(width = 200.dp, height = 60.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Bottom // Changed from Center to Bottom
             ) {
-                Text(
-                    text = "Go to Lists",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                // Welcome text and developer info removed
+
+                // Added more space at top to push button toward bottom
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = onNavigateToLists,
+                    modifier = Modifier.size(width = 200.dp, height = 60.dp)
+                ) {
+                    Text(
+                        text = "Go to Lists",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                // Add some space at the bottom for better positioning
+                Spacer(modifier = Modifier.height(60.dp))
             }
         }
     }
@@ -94,25 +101,12 @@ fun HomeScreenPreview() {
                     .fillMaxSize()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Bottom // Changed from Center to Bottom
             ) {
-                Text(
-                    text = "Welcome to Your_Name's TO DO List!",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
-                )
+                // Welcome text and developer info removed
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "This App was developed by Your_Name (Student_ID).",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
+                // Added more space at top to push button toward bottom
+                Spacer(modifier = Modifier.weight(1f))
 
                 Button(
                     onClick = { },
@@ -124,6 +118,9 @@ fun HomeScreenPreview() {
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                // Add some space at the bottom for better positioning
+                Spacer(modifier = Modifier.height(60.dp))
             }
         }
     }
