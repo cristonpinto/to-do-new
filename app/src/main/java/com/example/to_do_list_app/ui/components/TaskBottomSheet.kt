@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,7 +31,8 @@ import com.example.to_do_list_app.model.TodoList
 fun TaskBottomSheet(
     lists: List<TodoList>,
     onDismiss: () -> Unit,
-    onCreateTask: (description: String, listId: Long) -> Unit
+    onCreateTask: (description: String, listId: Long) -> Unit,
+    onDetailsClick: () -> Unit = {} // Add callback for details button
 ) {
     var taskDescription by remember { mutableStateOf("") }
     var selectedListId by remember { mutableStateOf(lists.firstOrNull()?.id ?: -1L) }
@@ -128,6 +131,48 @@ fun TaskBottomSheet(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                 )
             )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Details button with more explicit click handling
+            Button(
+                onClick = {
+                    // Add logging
+                    android.util.Log.d("TaskBottomSheet", "Details button clicked")
+                    // Call navigation first, then dismiss
+                    onDetailsClick()
+                    android.util.Log.d("TaskBottomSheet", "onDetailsClick called")
+                    onDismiss()
+                    android.util.Log.d("TaskBottomSheet", "onDismiss called")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Details",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.1.sp
+                        )
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "Go to details",
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 

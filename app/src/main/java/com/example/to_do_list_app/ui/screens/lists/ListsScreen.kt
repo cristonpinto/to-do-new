@@ -97,8 +97,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.navigation.NavController
 import com.example.to_do_list_app.R
 import com.example.to_do_list_app.model.TodoList
+import com.example.to_do_list_app.navigation.Screen
 import com.example.to_do_list_app.ui.components.TaskBottomSheet
 import com.example.to_do_list_app.ui.screens.auth.AuthViewModel
 import kotlin.random.Random
@@ -113,7 +115,8 @@ fun ListsScreen(
     todoViewModel: TodoViewModel,
     authViewModel: AuthViewModel,
     onNavigateToLogin: () -> Unit,
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    navController: NavController
 ) {
     val todoState by todoViewModel.todoState.collectAsState()
     val authState by authViewModel.authState.collectAsState()
@@ -506,6 +509,13 @@ fun ListsScreen(
                             onCreateTask = { description, listId ->
                                 todoViewModel.createTask(description, listId)
                                 showTaskBottomSheet = false
+                            },
+                            onDetailsClick = {
+                                android.util.Log.d("ListsScreen", "Details button clicked, navigating to TaskDetails")
+                                navController.navigate(Screen.TaskDetails.route) {
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         )
                     }

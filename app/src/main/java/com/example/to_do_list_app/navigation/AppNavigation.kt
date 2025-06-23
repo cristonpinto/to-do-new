@@ -18,6 +18,7 @@ import com.example.to_do_list_app.ui.screens.lists.ListDetailsScreen
 import com.example.to_do_list_app.ui.screens.lists.ListsScreen
 import com.example.to_do_list_app.ui.screens.lists.TodoViewModel
 import com.example.to_do_list_app.ui.screens.profile.ProfileScreen
+import com.example.to_do_list_app.ui.screens.tasks.TaskDetailsScreen
 
 /**
  * Navigation routes for the app
@@ -31,6 +32,7 @@ sealed class Screen(val route: String) {
     object ListDetails : Screen("list/{listId}") {
         fun createRoute(listId: Long) = "list/$listId"
     }
+    object TaskDetails : Screen("taskDetails") // Add new TaskDetails route
 }
 
 /**
@@ -85,7 +87,8 @@ fun AppNavigation(
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.Profile.route)
-                }
+                },
+                navController = navController
             )
         }
 
@@ -97,18 +100,35 @@ fun AppNavigation(
             ListDetailsScreen(
                 listId = listId,
                 todoViewModel = todoViewModel,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onNavigateToTaskDetails = {
+                    navController.navigate(Screen.TaskDetails.route) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
             )
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
+                onBack = { navController.navigateUp() },
                 authViewModel = authViewModel,
-                onBack = { navController.popBackStack() },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Profile.route) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Screen.TaskDetails.route) {
+            android.util.Log.d("Navigation", "Composing TaskDetailsScreen")
+            TaskDetailsScreen(
+                onBack = { navController.navigateUp() },
+                onAddTask = { hasPriority, date, time ->
+                    // Handle task creation here
+                    navController.navigateUp()
                 }
             )
         }

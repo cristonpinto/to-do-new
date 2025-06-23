@@ -44,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.to_do_list_app.model.TodoItem
 import com.example.to_do_list_app.R
+import com.example.to_do_list_app.navigation.Screen
+import com.example.to_do_list_app.ui.components.TaskBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,10 +53,13 @@ import kotlinx.coroutines.launch
 fun ListDetailsScreen(
     listId: Long,
     todoViewModel: TodoViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToTaskDetails: () -> Unit // Add this parameter
 ) {
+    android.util.Log.d("ListDetailsScreen", "Screen composed with listId: $listId")
+
     val todoState by todoViewModel.todoState.collectAsState()
-    var showAddItemDialog by remember { mutableStateOf(false) }
+    var showAddTaskSheet by remember { mutableStateOf(false) }
     var newItemDescription by remember { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -129,7 +134,7 @@ fun ListDetailsScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { showAddItemDialog = true },
+                onClick = { showAddTaskSheet = true }, // Open TaskBottomSheet instead
                 modifier = Modifier.shadow(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(28.dp),
@@ -268,19 +273,20 @@ fun ListDetailsScreen(
                 }
             }
 
-            if (showAddItemDialog) {
-                ModernAddItemDialog(
-                    onDismiss = {
-                        showAddItemDialog = false
-                        newItemDescription = ""
-                    },
-                    onAdd = { description ->
+            if (showAddTaskSheet) {
+                TaskBottomSheet(
+                    lists = listOf(todoState.currentList).filterNotNull(),
+                    onDismiss = { showAddTaskSheet = false },
+                    onCreateTask = { description, listId ->
                         todoViewModel.addItem(listId, description)
-                        showAddItemDialog = false
-                        newItemDescription = ""
+                        showAddTaskSheet = false
                         coroutineScope.launch {
                             lazyListState.animateScrollToItem(1) // Skip progress card
                         }
+                    },
+                    onDetailsClick = {
+                        android.util.Log.d("ListDetailsScreen", "Details button clicked, navigating to TaskDetails")
+                        onNavigateToTaskDetails()
                     }
                 )
             }
@@ -413,111 +419,6 @@ private fun ProgressCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ModernAddItemDialog(
-    onDismiss: () -> Unit,
-    onAdd: (String) -> Unit
-) {
-    var itemDescription by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        modifier = Modifier.clip(RoundedCornerShape(24.dp)),
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Task,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Text(
-                    "Create New Task",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "What would you like to accomplish?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedTextField(
-                    value = itemDescription,
-                    onValueChange = { itemDescription = it },
-                    label = { Text("Task description") },
-                    placeholder = { Text("e.g., Review quarterly reports") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = false,
-                    minLines = 3,
-                    maxLines = 5,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary
-                    )
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onAdd(itemDescription) },
-                enabled = itemDescription.isNotBlank(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                modifier = Modifier.height(48.dp)
-            ) {
-                Text(
-                    "Add Task",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.primary
-                ),
-                modifier = Modifier.height(48.dp)
-            ) {
-                Text(
-                    "Cancel",
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-        },
-        shape = RoundedCornerShape(24.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 12.dp
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
